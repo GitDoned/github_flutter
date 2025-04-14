@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - docs/add-Permissions
   workflow_dispatch:
 
 jobs:
@@ -27,7 +28,7 @@ jobs:
         run: dart doc .
 
       - name: Upload build artifacts
-        uses: actions/upload-artifacts@v4
+        uses: actions/upload-artifacts@v3
         with:
           name: doc-build
           path: ./doc/api
