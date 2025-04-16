@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 ///
 ///
 class DeviceFlow {
-  /// OAuth2 Client ID
+  /// Client ID
   final String clientId;
 
   /// Requested Scopes
@@ -19,21 +19,14 @@ class DeviceFlow {
   /// Grant type
   final String? grantType;
 
-  /// State
-  final String? state;
-
   /// Device flow Base URL
   final String baseUrl;
 
   Map<String, dynamic> _response = {};
 
-  GitHub? github;
-
   DeviceFlow(
     this.clientId, {
     this.scopes = const [],
-    this.state,
-    this.github,
     this.baseUrl = 'https://github.com',
     this.grantType = "urn:ietf:params:oauth:grant-type:device_code",
   });
@@ -70,13 +63,14 @@ class DeviceFlow {
   ///
   /// This should be displayed to the user.
   String createAuthorizeUrl() {
+    if (_response['verification_uri'] == null) throw Error();
     return '${_response['verification_uri']}?user_code=${_response['user_code']}';
   }
 
   /// Exchange `device code` after user verified for token
-  Future<ExchangeResponse> exchange() {
-    if (!_response.containsKey("deviceCode")) {
-      throw Error();
+  Future<DeviceFlowExchangeResponse> exchange() {
+    if (!_response.containsKey("device_code")) {
+      throw Exception("Device code not found");
     }
 
     final headers = <String, String>{
@@ -86,7 +80,7 @@ class DeviceFlow {
 
     final body = GitHubJson.encode(<String, dynamic>{
       'client_id': clientId,
-      'device_code': _response['deviceCode'],
+      'device_code': _response['device_code'],
       'grant_type': grantType,
     });
 
@@ -99,22 +93,29 @@ class DeviceFlow {
         .then((response) {
           final json = jsonDecode(response.body) as Map<String, dynamic>;
           if (json['error'] != null) {
-            throw Exception(json['error']);
+            throw Exception(json['error'] ?? "Unknown error");
           }
-          return ExchangeResponse(
+          return DeviceFlowExchangeResponse(
             json['access_token'],
             json['token_type'],
             (json['scope'] as String).split(','),
+            json['interval'] ?? 0,
           );
         });
   }
 }
 
 /// Represents a response for exchanging a code for a token.
-class ExchangeResponse {
+class DeviceFlowExchangeResponse {
   final String? token;
   final List<String> scopes;
   final String? tokenType;
+  final int interval;
 
-  ExchangeResponse(this.token, this.tokenType, this.scopes);
+  DeviceFlowExchangeResponse(
+    this.token,
+    this.tokenType,
+    this.scopes,
+    this.interval,
+  );
 }
