@@ -22,6 +22,9 @@ class DeviceFlow {
   /// Device flow Base URL
   final String baseUrl;
 
+  /// GitHub instance
+  GitHub? github;
+
   Map<String, dynamic> _response = {};
 
   DeviceFlow(
@@ -63,7 +66,9 @@ class DeviceFlow {
   ///
   /// This should be displayed to the user.
   String createAuthorizeUrl() {
-    if (_response['verification_uri'] == null) throw Error();
+    if (_response['verification_uri'] == null) {
+      throw Error();
+    }
     return '${_response['verification_uri']}?user_code=${_response['user_code']}';
   }
 

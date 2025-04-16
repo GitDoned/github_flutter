@@ -5,6 +5,7 @@ library;
 export 'package:github_flutter/src/common/github.dart';
 export 'package:github_flutter/src/common/util/auth.dart';
 export 'package:github_flutter/src/common/util/crawler.dart';
+export 'package:github_flutter/src/common/util/device_flow.dart';
 export 'package:github_flutter/src/common/util/errors.dart';
 export 'package:github_flutter/src/common/util/json.dart';
 export 'package:github_flutter/src/common/util/oauth2.dart';
